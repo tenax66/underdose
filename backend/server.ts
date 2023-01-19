@@ -1,4 +1,5 @@
 import express from "express";
+import path from "path";
 import { Client } from "twitter-api-sdk";
 import "dotenv/config";
 
@@ -6,6 +7,8 @@ const app: express.Express = express();
 const port = 8000;
 
 const MAX_RESULTS = 10;
+
+app.use(express.static(path.join(__dirname, "../frontend/build")));
 
 app.get("/search", async (req: express.Request, res: express.Response) => {
   const token = process.env.BEARER_TOKEN;
@@ -31,6 +34,10 @@ async function searchByTweet(client: Client, query: string): Promise<any> {
 
   return response.data;
 }
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build/index.html"));
+});
 
 app.listen(port, () => {
   console.log(`server running on port ${port}`);
