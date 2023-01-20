@@ -1,4 +1,5 @@
 import * as React from "react";
+import { TwitterTweetEmbed } from "react-twitter-embed";
 
 type Tweet = {
   edit_history_tweet_ids: string[];
@@ -29,10 +30,7 @@ const App: React.FC = () => {
 
       {tweets?.map((tweet: Tweet) => (
         <div key={tweet.id}>
-          <h2>{tweet.id}</h2>
-          <div className="text">
-            <p>{tweet.text}</p>
-          </div>
+          <TwitterTweetEmbed tweetId={tweet.id} />
         </div>
       ))}
     </div>
