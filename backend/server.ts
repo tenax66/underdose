@@ -4,7 +4,7 @@ import { Client } from "twitter-api-sdk";
 import "dotenv/config";
 
 const app: express.Express = express();
-const port = 8000;
+const port = Number(process.env.PORT) || 8000;
 
 const MAX_RESULTS = 10;
 
