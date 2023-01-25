@@ -38,13 +38,20 @@ const App: React.FC = () => {
         <Title style={{ color: "white", paddingTop: "5px" }}>Underdose</Title>
         <Menu theme="dark" mode="horizontal" items={[]} />
       </Header>
-      <Content className="site-layout" style={{ padding: "0 50px" }}>
-        <div style={{ padding: 24, minHeight: 380, background: colorBgContainer }}>
+      <Content className="site-layout" style={{ padding: "0 25px" }}>
+        <div style={{ padding: 8, minHeight: 380, background: colorBgContainer }}>
           <div className="container tweets">
             <h1>Tweets</h1>
             {tweets?.map((tweet: Tweet) => (
               <div key={tweet.id}>
-                <TwitterTweetEmbed tweetId={tweet.id} />
+                <TwitterTweetEmbed
+                  tweetId={tweet.id}
+                  options={{
+                    hideCard: false,
+                    hideThread: true,
+                  }}
+                  placeholder="loading..."
+                />
               </div>
             ))}
           </div>
