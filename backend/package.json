@@ -22,7 +22,9 @@
   "dependencies": {
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "kuromojin": "^3.0.0",
     "needle": "^3.2.0",
+    "negaposi-analyzer-ja": "^1.0.1",
     "path": "^0.12.7",
     "twitter-api-sdk": "^1.2.1"
   }

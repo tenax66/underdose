@@ -8,6 +8,11 @@ type Tweet = {
   text: string;
 };
 
+type ScoredTweet = {
+  tweet: Tweet;
+  score: string;
+};
+
 const { Header, Content, Footer } = Layout;
 const { Title } = Typography;
 
@@ -17,6 +22,7 @@ const App: React.FC = () => {
   } = theme.useToken();
 
   const [tweets, setTweets] = React.useState<Tweet[] | null>(null);
+  const [scoredTweets, setScoredTweets] = React.useState<ScoredTweet[] | null>(null);
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -32,6 +38,33 @@ const App: React.FC = () => {
     fetchData();
   }, []);
 
+  React.useEffect(() => {
+    const fetchScore = async () => {
+      const scoredTweets: ScoredTweet[] = [];
+
+      tweets?.forEach(async function (tweet: Tweet) {
+        const params = {
+          text: tweet.text,
+        };
+        const urlSearchParam = new URLSearchParams(params).toString();
+        const res = await fetch("/emotional-analysis/?" + urlSearchParam);
+        const json = await res.json();
+
+        const scoredTweet: ScoredTweet = {
+          tweet: tweet,
+          score: json.score,
+        };
+
+        scoredTweets.push(scoredTweet);
+      });
+
+      const json: React.SetStateAction<ScoredTweet[] | null> = scoredTweets;
+      setScoredTweets(json);
+    };
+
+    fetchScore();
+  }, []);
+
   return (
     <Layout>
       <Header style={{ position: "sticky", top: 0, zIndex: 1, width: "100%" }}>
@@ -42,16 +75,17 @@ const App: React.FC = () => {
         <div style={{ padding: 8, minHeight: 380, background: colorBgContainer }}>
           <div className="container tweets">
             <h1>Tweets</h1>
-            {tweets?.map((tweet: Tweet) => (
-              <div key={tweet.id}>
+            {scoredTweets?.map((scoredTweet: ScoredTweet) => (
+              <div key={scoredTweet.tweet.id}>
                 <TwitterTweetEmbed
-                  tweetId={tweet.id}
+                  tweetId={scoredTweet.tweet.id}
                   options={{
                     hideCard: false,
                     hideThread: true,
                   }}
                   placeholder="loading..."
                 />
+                <div>{scoredTweet.score}</div>
               </div>
             ))}
           </div>
