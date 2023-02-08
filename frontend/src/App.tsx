@@ -6,11 +6,7 @@ type Tweet = {
   edit_history_tweet_ids: string[];
   id: string;
   text: string;
-};
-
-type ScoredTweet = {
-  tweet: Tweet;
-  score: string;
+  score: number;
 };
 
 const { Header, Content, Footer } = Layout;
@@ -21,48 +17,32 @@ const App: React.FC = () => {
     token: { colorBgContainer },
   } = theme.useToken();
 
-  const [tweets, setTweets] = React.useState<Tweet[] | null>(null);
-  const [scoredTweets, setScoredTweets] = React.useState<ScoredTweet[] | null>(null);
+  const [tweets, setTweets] = React.useState<Tweet[]>([]);
 
   React.useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await fetch("/search");
-        const json: React.SetStateAction<Tweet[] | null> = await res.json();
-        setTweets(json);
+        const json: Tweet[] = await res.json();
+
+        //map内で非同期処理を行う
+        const result = await Promise.all(
+          json.map(async (tweet: Tweet) => {
+            const urlSearchParam = new URLSearchParams({ text: tweet.text }).toString();
+            const res = await fetch("/emotional-analysis/?" + urlSearchParam);
+            const json = await res.json();
+            tweet.score = json.score;
+
+            return tweet;
+          })
+        );
+        setTweets(result);
       } catch (e: unknown) {
         console.error(e);
       }
     };
 
     fetchData();
-  }, []);
-
-  React.useEffect(() => {
-    const fetchScore = async () => {
-      const scoredTweets: ScoredTweet[] = [];
-
-      tweets?.forEach(async function (tweet: Tweet) {
-        const params = {
-          text: tweet.text,
-        };
-        const urlSearchParam = new URLSearchParams(params).toString();
-        const res = await fetch("/emotional-analysis/?" + urlSearchParam);
-        const json = await res.json();
-
-        const scoredTweet: ScoredTweet = {
-          tweet: tweet,
-          score: json.score,
-        };
-
-        scoredTweets.push(scoredTweet);
-      });
-
-      const json: React.SetStateAction<ScoredTweet[] | null> = scoredTweets;
-      setScoredTweets(json);
-    };
-
-    fetchScore();
   }, []);
 
   return (
@@ -75,17 +55,17 @@ const App: React.FC = () => {
         <div style={{ padding: 8, minHeight: 380, background: colorBgContainer }}>
           <div className="container tweets">
             <h1>Tweets</h1>
-            {scoredTweets?.map((scoredTweet: ScoredTweet) => (
-              <div key={scoredTweet.tweet.id}>
+            {tweets?.map((tweet: Tweet) => (
+              <div key={tweet.id}>
                 <TwitterTweetEmbed
-                  tweetId={scoredTweet.tweet.id}
+                  tweetId={tweet.id}
                   options={{
                     hideCard: false,
                     hideThread: true,
                   }}
                   placeholder="loading..."
                 />
-                <div>{scoredTweet.score}</div>
+                <div>{tweet.score}</div>
               </div>
             ))}
           </div>
